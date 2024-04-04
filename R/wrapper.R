@@ -1,0 +1,92 @@
+#'@title Fit SeaBASS model
+#'@param data list with AE count (A), confounders (X), vaccine indication (V), number of each categories
+#'@param initial list include the parameter initial values, default is from glm fit results
+#' @export
+SeaBASS = function(data, 
+                   initial = NULL,
+                   horseshoe = TRUE,
+                   cutoff_beta = 4,
+                   cutoff_alpha = 12,
+                   mu_alpha = NULL,
+                   mu_beta = NULL,
+                   a_alpha = 0.001,
+                   b_alpha  = 0.001,
+                   init_inv_sigma2_beta = NULL,
+                   init_inv_sigma2_alpha = NULL,
+                   init_inv_a_beta = NULL,
+                   init_inv_a_tau = NULL,
+                   init_inv_tau2 = NULL,
+                   nu_0 = 1,
+                   eta2_0 = 1,
+                   nu_1 = 1,
+                   eta2_1 = 1,
+                   include_intercept=FALSE,
+                   ELBO_stop = 1,
+                   max_iter=5000,
+                   ELBO_diff_tol=1e-6,
+                   paras_diff_tol = 1e-6,
+                   verbose=0, save_profile = 1){
+  
+  
+  AEs = colnames(data$A)
+  if (include_intercept) {
+    data$X = cbind(1, data$X)
+  }
+  
+  J = ncol(data$A)
+  p = ncol(data$X)
+  
+  ### set inital values
+  if(is.null(mu_alpha)){
+    mu_alpha = matrix(0, ncol = J, nrow=p)
+    
+  }
+  if(is.null(mu_beta)){
+    mu_beta = rep(0, J)
+  }
+  
+  if(is.null(init_inv_sigma2_beta)) init_inv_sigma2_beta = rep(1, J)
+  if(is.null(init_inv_sigma2_alpha)) init_inv_sigma2_alpha = matrix(1, ncol = J, nrow = p)
+  
+  if(is.null(init_inv_a_beta)) init_inv_a_beta =rep(0.5 , J)
+  if(is.null(init_inv_tau2)) init_inv_tau2 = 1
+  if(is.null(init_inv_a_tau)) init_inv_a_tau = 0.5
+  
+  if(is.null(initial)) {
+    initials <- get_glm_coefs(data)
+    initials <- coef_cutoff(initials, beta_cutoff, alpha_cutoff)
+    init_beta = initials$beta
+    init_alpha = initials$alpha
+  } else {
+    init_beta = initial$beta
+    init_alpha = initial$alpha
+  }
+  
+  seabass_fit <- SeaBASS_cpp(data$A, data$X, data$V,data$nn,
+                        horseshoe=horseshoe,
+                        initial_beta = init_beta,
+                        initial_alpha = init_alpha,
+                        initial_inv_sigma2_beta = init_inv_sigma2_beta,
+                        initial_inv_sigma2_alpha =init_inv_sigma2_alpha,
+                        initial_inv_a_beta = init_inv_a_beta,
+                        initial_inv_tau2 = init_inv_tau2,
+                        initial_inv_a_tau = init_inv_a_tau,
+                        mu_alpha = mu_alpha,
+                        mu_beta = mu_beta,
+                        a_alpha = a_alpha,
+                        b_alpha  = b_alpha,
+                        nu_0 = nu_0,
+                        eta2_0 = eta2_0,
+                        nu_1 = nu_1,
+                        eta2_1 = eta2_1,
+                        ELBO_stop = ELBO_stop,
+                        ELBO_diff_tol = ELBO_diff_tol,
+                        paras_diff_tol = paras_diff_tol,
+                        max_iter = max_iter,
+                        verbose = verbose,
+                        save_profile = save_profile)
+  
+  colnames(seabass_fit$data$A) = AEs
+  return(seabass_fit)
+}
+
