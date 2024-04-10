@@ -1,0 +1,10 @@
+name: shiny
+title:
+username: ylzhong
+account: ylzhong
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 11718810
+bundleId: 8476509
+url: https://ylzhong.shinyapps.io/shiny/
+version: 1

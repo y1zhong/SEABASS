@@ -1,0 +1,139 @@
+rm(list=ls())
+options(stringsAsFactors = FALSE)
+library(reshape2)
+library(dplyr)
+
+#----------------------------------------------------------------
+# upload VAX, AE and pat data from VAERS
+# clean and merge them
+# Output: full_dds.csv
+#----------------------------------------------------------------
+setwd("~/Dropbox (University of Michigan)/VBVaccine/Rcode/")
+
+year=2016:2023
+
+#### data_PAT
+dd_pat=NULL
+for (k in 1:length(year)){
+  tmp=read.csv(paste('data/VaersRawData/',year[k],"VAERSDATA",".csv",sep=""),na = "")
+  dd_pat[[k]]=tmp[,c("VAERS_ID","RECVDATE", "AGE_YRS","CAGE_YR","CAGE_MO","VAX_DATE","NUMDAYS","SEX","STATE","DIED","DATEDIED","ALLERGIES")]
+
+}
+
+data_PAT=Reduce("rbind",dd_pat)
+data_PAT=data_PAT[order(data_PAT$VAERS_ID),]
+
+#-- clean the age variable (CAGE= CAGE_YR+CAGE_MO by vax_date-birthdate; NUMDAYS:ONSET_DATE-VAX_DATE)
+CAGE_MO=ifelse(is.na(data_PAT$CAGE_MO),0,data_PAT$CAGE_MO)
+CAGE=data_PAT$CAGE_YR+CAGE_MO
+data_PAT$AGE=ifelse(is.na(CAGE), data_PAT$AGE_YRS, CAGE)
+
+#sum(!is.na(data_PAT$AGE_YRS) & is.na(CAGE))
+#sum(abs(data_PAT$AGE_YRS-CAGE)>5,na.rm=TRUE)
+
+#### data_VAC
+dd_vac=NULL
+for (k in 1:length(year)){
+  tmp=read.csv(paste('data/VaersRawData/',year[k],"VAERSVAX",".csv",sep=""), na = "")
+  dd_vac[[k]]=tmp[,c("VAERS_ID","VAX_NAME","VAX_TYPE")]
+}
+
+data_VAC=Reduce("rbind",dd_vac)
+data_VAC=data_VAC[order(data_VAC$VAERS_ID),]
+
+
+#### data_AE
+dd_ae=NULL
+for (k in 1:length(year)){
+  tmp=read.csv(paste('data/VaersRawData/', year[k],"VAERSSYMPTOMS",".csv",sep=""), na = "")
+  tmp=tmp[,c("VAERS_ID","SYMPTOM1","SYMPTOM2","SYMPTOM3","SYMPTOM4","SYMPTOM5")]
+  tmp[tmp==""] = NA
+  tmp.long=melt(tmp, id.vars = c('VAERS_ID'), measure.vars = 2:6, na.rm = T, value.name = "AE_NAME")
+  dd_ae[[k]]=tmp.long
+  dd_ae[[k]]$year=year[k]
+}
+data_ae=Reduce("rbind",dd_ae)
+data_ae=data_ae[order(data_ae$VAERS_ID),]
+
+
+
+meddra_list = read.csv("data/VaersRawData/final_MedDRA.csv",header=T)
+# merge with PT ID
+meddra_ptlist = meddra_list %>% distinct(PT, PT_ID) %>% transmute(AE_NAME = PT, MEDDRA_ID = PT_ID)
+# If cannot mapped PT, then merge with LLT and use the first PT ID
+meddra_lltlist = meddra_list %>% distinct(LLT, PT_ID) %>% transmute(AE_NAME = LLT, MEDDRA_ID = PT_ID)
+data_AE = merge(data_ae, meddra_ptlist, by = 'AE_NAME', all.x = T) %>% as_tibble()
+data_AE[is.na(data_AE$MEDDRA_ID), ] = merge(data_AE[is.na(data_AE$MEDDRA_ID), 1:4],
+                                            meddra_ptlist, by = "AE_NAME", all.x = T) %>% as_tibble()
+#length(unique(data_AE$AE_NAME))  > 7788
+
+#### combine VAX-AE-PAT files
+dd_VAC_AE=merge(data_VAC,data_AE, by=c("VAERS_ID"))
+dd_VAC_AE_PAT=merge(dd_VAC_AE,data_PAT, by=c("VAERS_ID"),all.x = TRUE)
+dds=dd_VAC_AE_PAT[order(dd_VAC_AE_PAT$VAERS_ID),]
+
+dds = dds %>% mutate(VAX_YEAR = substr(VAX_DATE, nchar(VAX_DATE)-3, nchar(VAX_DATE)) %>% as.numeric(),
+                     AE_YEAR = year, AE_ONSET_DAYS = NUMDAYS) %>%
+  dplyr::select(VAERS_ID, AE_NAME, MEDDRA_ID, RECVDATE, AE_YEAR, AE_ONSET_DAYS,
+                AGE, SEX, STATE, DIED, DATEDIED,
+                VAX_NAME, VAX_TYPE,  VAX_DATE, VAX_YEAR
+  )
+
+dds_covid = dds %>% filter(VAX_TYPE == "COVID19" | substr(VAX_TYPE, 1, 3) == "FLU") %>%
+  mutate(VAX_LABEL = ifelse(VAX_TYPE == "COVID19", "COVID", "FLU")) %>% as_tibble()
+
+rm(dd_ae, dd_pat, dd_vac, meddra_lltlist, CAGE, CAGE_MO, tmp, tmp.long)
+
+
+write.csv(dds_covid, 'data/full_dds_covid_flu_2016_20231229.csv', row.names = F, na = "")
+write.csv(dds, 'data/full_dds_2016_20231229.csv', row.names = F, na = "")
+# dds_covid = read.csv("full_dds_covid_flu_2019_20210325.csv")
+
+### check all other AEs besides covid
+# ref_AEs <- dds %>%
+#   filter(!VAX_TYPE == "COVID19") %>%
+#     pull(AE_NAME)
+# save(ref_AEs,file = "~/Dropbox (University of Michigan)/BayesianVaccine/Rcode/yuan/data/red_AEs.RData")
+# #==========================================================================
+# #-- Summary and check
+# #-- Summary and check
+# # dds[is.na(dds$year),] ### Meaning that these VAERS_IDs do not exist on data_VAC or data_PAT, but only on data_A
+# summary(dds_covid)
+# sapply(dds_covid, function(x) sum(is.na(x)))
+#
+# ### number of AE mapped to MedDRA
+# dds_covid %>% distinct(AE_NAME, MEDDRA_ID) %>% pull(MEDDRA_ID) %>% is.na() %>% table()
+#
+# ### freq of vaccine
+# table(dds_covid$VAX_TYPE)
+# table(dds_covid$VAX_LABEL)
+#
+# table_pat = dds_covid %>%
+#   mutate(VAX_YEAR = ifelse(VAX_YEAR >=2016, VAX_YEAR, NA)) %>%
+#   distinct(VAERS_ID, VAX_LABEL,  .keep_all = T) %>%
+#   dplyr::select(VAX_LABEL, VAX_YEAR) %>%
+#   table(., useNA = "ifany")
+#
+# (cbind(table_pat, TOTAL = rowSums(table_pat)))
+#
+#
+# ### freq of AE
+# (dds_covid %>%
+#     group_by(AE_NAME, MEDDRA_ID) %>% summarise(freq = n()) %>% ungroup() %>%
+#     mutate(perc = round(freq/sum(freq)*100,2)) %>% arrange(-freq) -> freq_all)
+# (dds_covid %>% filter(VAX_LABEL == "COVID") %>%
+#     group_by(AE_NAME, VAX_LABEL) %>% summarise(freq = n()) %>% ungroup() %>%
+#     mutate(perc = round(freq/sum(freq)*100,2)) %>% arrange(-freq) -> freq_covid)
+# (dds_covid %>% filter(VAX_LABEL == "FLU") %>%
+#     group_by(AE_NAME, VAX_LABEL) %>% summarise(freq = n()) %>%  ungroup() %>%
+#     mutate(perc = round(freq/sum(freq)*100,2)) %>% arrange(-freq) -> freq_flu)
+# freq_all %>%
+#   left_join(freq_covid %>% dplyr::select(-VAX_LABEL), by = "AE_NAME", suffix = c("", ".covid")) %>%
+#   left_join(freq_flu %>% dplyr::select(-VAX_LABEL), by = "AE_NAME", suffix = c("", ".flu")) -> tbl_freq
+# View(tbl_freq)
+#
+# write.csv(tbl_freq, "Summary_frequency_table_2016_20210404.csv", row.names = F, na = "")
+#
+# dds_covid %>%
+#   group_by(AE_NAME, MEDDRA_ID) %>% summarise(freq = n()) %>% arrange(-freq) %>%
+#   filter(is.na(MEDDRA_ID))
