@@ -17,6 +17,7 @@ ui <- navbarPage(theme = shinytheme("cosmo"),
   tabPanel("COVID-19 vs FLU study",
            sidebarLayout(
              sidebarPanel(
+               p("Last updated: 2023-12"),
                checkboxInput("includeSignalAEs", "Only show signal AEs", value = FALSE),
                selectInput("showTopAEs", "Select AE number:", choices = c("All","5", "10", "50", "100")),
                uiOutput("dynamicAEs"),  # This will dynamically generate the AE select input
@@ -34,7 +35,7 @@ ui <- navbarPage(theme = shinytheme("cosmo"),
              mainPanel(
                tabsetPanel(
                  tabPanel("Risk Probability", plotOutput("riskPlot"), downloadButton("downloadRiskPlot", "Download Risk Probability Plot")),
-                 tabPanel("logROR Analysis", plotOutput("logRORPlot"), downloadButton("downloadLogRORPlot", "Download logROR Plot"))
+                 tabPanel("Reporting Odds Ratio", plotOutput("logRORPlot"), downloadButton("downloadLogRORPlot", "Download logROR Plot"))
                )
              )
            )
@@ -46,6 +47,7 @@ ui <- navbarPage(theme = shinytheme("cosmo"),
              tabPanel("Pre-process data",
                       sidebarLayout(
                         sidebarPanel(
+                          textInput("datapath", "Data path (e.g. path/to/VAERS/)"),
                           fluidRow(
                             column(6, selectInput("startYear", "Surveillance Start Year:", choices = 1990:2024, selected = 2016)),
                             column(6, selectInput("endYear", "Surveillance End Year:", choices = 1990:2024, selected = 2023))
@@ -62,8 +64,8 @@ ui <- navbarPage(theme = shinytheme("cosmo"),
                         ),
                         mainPanel(
                           # Placeholder for results or outputs related to the analysis
-                          h3("Processed Data"),
-                          verbatimTextOutput("datahead")
+                          h3("Processing..."),
+                          #verbatimTextOutput("datahead")
                         )
                       )
              ),
@@ -73,6 +75,8 @@ ui <- navbarPage(theme = shinytheme("cosmo"),
              tabPanel("Update model",
              ),
              tabPanel("Evaluate results",
+             ),
+             tabPanel("Help",
              ),
            )
   )
@@ -153,7 +157,7 @@ server <- function(input, output, session) {
       geom_hline(yintercept = threshold, linetype = "dashed", color = "darkgrey") +
       theme_minimal() +
       theme(legend.text = element_text(size = 12), axis.text = element_text(size = 12)) +  # Adjust text size
-      xlab("Date") + ylab("Posterior Risk Probability") +
+      xlab("Date") + ylab("Posterior risk probability") +
       ggtitle("Posterior Risk Probability Over Time")
   })
   
@@ -175,7 +179,7 @@ server <- function(input, output, session) {
         theme_minimal() +
         scale_color_jco() + scale_fill_jco()+
         theme(legend.text = element_text(size = 12), axis.text = element_text(size = 12)) +  # Adjust text size
-        xlab("Date") + ylab("Posterior Risk Probability") +
+        xlab("Date") + ylab("Posterior risk probability") +
         ggtitle("Posterior Risk Probability Over Time")
       
       # Save the plot to the specified file
@@ -229,10 +233,11 @@ server <- function(input, output, session) {
       paste("processed-data-", Sys.Date(), ".csv", sep = "")
     },
     content = function(file) {
-      req(input$startYear, input$endYear, input$targetVaccine, input$referenceVaccine, input$targetVaccineCount, input$referenceVaccineCount)
+      req(input$datapath, input$startYear, input$endYear, input$targetVaccine, input$referenceVaccine, input$targetVaccineCount, input$referenceVaccineCount)
       
       # Call your data processing function with the inputs
       processed_data <- processData(
+        datapath = input$datapath, 
         startyear = input$startYear, 
         endyear = input$endYear, 
         case = input$targetVaccine, 

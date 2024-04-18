@@ -1,7 +1,7 @@
 library(reshape2)
 #' clean and combine VAX, AE and pat data from VAERS
 #' @return cleaned dataframe
-processData <- function(startyear, endyear,
+processData <- function(datapath, startyear, endyear,
                          case, control,
                          case_cnt=1, control_cnt=1){
   
@@ -11,7 +11,7 @@ processData <- function(startyear, endyear,
   #### data_PAT
   dd_pat=NULL
   for (k in 1:length(year)){
-    tmp=read.csv(paste('data/',year[k],"VAERSDATA",".csv",sep=""),na = "")
+    tmp=read.csv(paste(datapath,year[k],"VAERSDATA",".csv",sep=""),na = "")
     dd_pat[[k]]=tmp[,c("VAERS_ID","RECVDATE", "AGE_YRS","CAGE_YR","CAGE_MO","VAX_DATE","NUMDAYS","SEX","STATE","DIED","DATEDIED","ALLERGIES")]
     
   }
