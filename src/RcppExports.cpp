@@ -11,6 +11,88 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
+// Gibbs_cpp
+List Gibbs_cpp(arma::mat& A, arma::mat& X, arma::vec& V, arma::vec& nn, arma::vec initial_beta, arma::mat initial_alpha, arma::vec initial_inv_sigma2_beta, arma::mat initial_inv_sigma2_alpha, arma::vec initial_inv_a_beta, double initial_inv_tau2, double initial_inv_a_tau, double a_alpha, double b_alpha, double nu_0, double eta2_0, double nu_1, double eta2_1, bool horseshoe, int mcmc_sample, int burnin, int thinning, double paras_diff_tol, int verbose, int save_profile);
+RcppExport SEXP _SeaBASS_Gibbs_cpp(SEXP ASEXP, SEXP XSEXP, SEXP VSEXP, SEXP nnSEXP, SEXP initial_betaSEXP, SEXP initial_alphaSEXP, SEXP initial_inv_sigma2_betaSEXP, SEXP initial_inv_sigma2_alphaSEXP, SEXP initial_inv_a_betaSEXP, SEXP initial_inv_tau2SEXP, SEXP initial_inv_a_tauSEXP, SEXP a_alphaSEXP, SEXP b_alphaSEXP, SEXP nu_0SEXP, SEXP eta2_0SEXP, SEXP nu_1SEXP, SEXP eta2_1SEXP, SEXP horseshoeSEXP, SEXP mcmc_sampleSEXP, SEXP burninSEXP, SEXP thinningSEXP, SEXP paras_diff_tolSEXP, SEXP verboseSEXP, SEXP save_profileSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat& >::type A(ASEXP);
+    Rcpp::traits::input_parameter< arma::mat& >::type X(XSEXP);
+    Rcpp::traits::input_parameter< arma::vec& >::type V(VSEXP);
+    Rcpp::traits::input_parameter< arma::vec& >::type nn(nnSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type initial_beta(initial_betaSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type initial_alpha(initial_alphaSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type initial_inv_sigma2_beta(initial_inv_sigma2_betaSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type initial_inv_sigma2_alpha(initial_inv_sigma2_alphaSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type initial_inv_a_beta(initial_inv_a_betaSEXP);
+    Rcpp::traits::input_parameter< double >::type initial_inv_tau2(initial_inv_tau2SEXP);
+    Rcpp::traits::input_parameter< double >::type initial_inv_a_tau(initial_inv_a_tauSEXP);
+    Rcpp::traits::input_parameter< double >::type a_alpha(a_alphaSEXP);
+    Rcpp::traits::input_parameter< double >::type b_alpha(b_alphaSEXP);
+    Rcpp::traits::input_parameter< double >::type nu_0(nu_0SEXP);
+    Rcpp::traits::input_parameter< double >::type eta2_0(eta2_0SEXP);
+    Rcpp::traits::input_parameter< double >::type nu_1(nu_1SEXP);
+    Rcpp::traits::input_parameter< double >::type eta2_1(eta2_1SEXP);
+    Rcpp::traits::input_parameter< bool >::type horseshoe(horseshoeSEXP);
+    Rcpp::traits::input_parameter< int >::type mcmc_sample(mcmc_sampleSEXP);
+    Rcpp::traits::input_parameter< int >::type burnin(burninSEXP);
+    Rcpp::traits::input_parameter< int >::type thinning(thinningSEXP);
+    Rcpp::traits::input_parameter< double >::type paras_diff_tol(paras_diff_tolSEXP);
+    Rcpp::traits::input_parameter< int >::type verbose(verboseSEXP);
+    Rcpp::traits::input_parameter< int >::type save_profile(save_profileSEXP);
+    rcpp_result_gen = Rcpp::wrap(Gibbs_cpp(A, X, V, nn, initial_beta, initial_alpha, initial_inv_sigma2_beta, initial_inv_sigma2_alpha, initial_inv_a_beta, initial_inv_tau2, initial_inv_a_tau, a_alpha, b_alpha, nu_0, eta2_0, nu_1, eta2_1, horseshoe, mcmc_sample, burnin, thinning, paras_diff_tol, verbose, save_profile));
+    return rcpp_result_gen;
+END_RCPP
+}
+// SeaBASS_cpp
+List SeaBASS_cpp(arma::mat& A, arma::mat& X, arma::vec& V, arma::vec& nn, arma::vec initial_beta, arma::mat initial_alpha, arma::vec initial_inv_sigma2_beta, arma::mat initial_inv_sigma2_alpha, arma::vec initial_inv_a_beta, double initial_inv_tau2, double initial_inv_a_tau, arma::vec mu_beta, arma::mat mu_alpha, bool horseshoe, double a_alpha, double b_alpha, double nu_0, double eta2_0, double nu_1, double eta2_1, int max_iter, double paras_diff_tol, int ELBO_stop, double ELBO_diff_tol, int verbose, int save_profile);
+RcppExport SEXP _SeaBASS_SeaBASS_cpp(SEXP ASEXP, SEXP XSEXP, SEXP VSEXP, SEXP nnSEXP, SEXP initial_betaSEXP, SEXP initial_alphaSEXP, SEXP initial_inv_sigma2_betaSEXP, SEXP initial_inv_sigma2_alphaSEXP, SEXP initial_inv_a_betaSEXP, SEXP initial_inv_tau2SEXP, SEXP initial_inv_a_tauSEXP, SEXP mu_betaSEXP, SEXP mu_alphaSEXP, SEXP horseshoeSEXP, SEXP a_alphaSEXP, SEXP b_alphaSEXP, SEXP nu_0SEXP, SEXP eta2_0SEXP, SEXP nu_1SEXP, SEXP eta2_1SEXP, SEXP max_iterSEXP, SEXP paras_diff_tolSEXP, SEXP ELBO_stopSEXP, SEXP ELBO_diff_tolSEXP, SEXP verboseSEXP, SEXP save_profileSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat& >::type A(ASEXP);
+    Rcpp::traits::input_parameter< arma::mat& >::type X(XSEXP);
+    Rcpp::traits::input_parameter< arma::vec& >::type V(VSEXP);
+    Rcpp::traits::input_parameter< arma::vec& >::type nn(nnSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type initial_beta(initial_betaSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type initial_alpha(initial_alphaSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type initial_inv_sigma2_beta(initial_inv_sigma2_betaSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type initial_inv_sigma2_alpha(initial_inv_sigma2_alphaSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type initial_inv_a_beta(initial_inv_a_betaSEXP);
+    Rcpp::traits::input_parameter< double >::type initial_inv_tau2(initial_inv_tau2SEXP);
+    Rcpp::traits::input_parameter< double >::type initial_inv_a_tau(initial_inv_a_tauSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type mu_beta(mu_betaSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type mu_alpha(mu_alphaSEXP);
+    Rcpp::traits::input_parameter< bool >::type horseshoe(horseshoeSEXP);
+    Rcpp::traits::input_parameter< double >::type a_alpha(a_alphaSEXP);
+    Rcpp::traits::input_parameter< double >::type b_alpha(b_alphaSEXP);
+    Rcpp::traits::input_parameter< double >::type nu_0(nu_0SEXP);
+    Rcpp::traits::input_parameter< double >::type eta2_0(eta2_0SEXP);
+    Rcpp::traits::input_parameter< double >::type nu_1(nu_1SEXP);
+    Rcpp::traits::input_parameter< double >::type eta2_1(eta2_1SEXP);
+    Rcpp::traits::input_parameter< int >::type max_iter(max_iterSEXP);
+    Rcpp::traits::input_parameter< double >::type paras_diff_tol(paras_diff_tolSEXP);
+    Rcpp::traits::input_parameter< int >::type ELBO_stop(ELBO_stopSEXP);
+    Rcpp::traits::input_parameter< double >::type ELBO_diff_tol(ELBO_diff_tolSEXP);
+    Rcpp::traits::input_parameter< int >::type verbose(verboseSEXP);
+    Rcpp::traits::input_parameter< int >::type save_profile(save_profileSEXP);
+    rcpp_result_gen = Rcpp::wrap(SeaBASS_cpp(A, X, V, nn, initial_beta, initial_alpha, initial_inv_sigma2_beta, initial_inv_sigma2_alpha, initial_inv_a_beta, initial_inv_tau2, initial_inv_a_tau, mu_beta, mu_alpha, horseshoe, a_alpha, b_alpha, nu_0, eta2_0, nu_1, eta2_1, max_iter, paras_diff_tol, ELBO_stop, ELBO_diff_tol, verbose, save_profile));
+    return rcpp_result_gen;
+END_RCPP
+}
+// rcpp_pgdraw
+NumericVector rcpp_pgdraw(NumericVector b, NumericVector c);
+RcppExport SEXP _SeaBASS_rcpp_pgdraw(SEXP bSEXP, SEXP cSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type b(bSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type c(cSEXP);
+    rcpp_result_gen = Rcpp::wrap(rcpp_pgdraw(b, c));
+    return rcpp_result_gen;
+END_RCPP
+}
 // rcpparma_hello_world
 arma::mat rcpparma_hello_world();
 RcppExport SEXP _SeaBASS_rcpparma_hello_world() {
@@ -56,6 +138,9 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_SeaBASS_Gibbs_cpp", (DL_FUNC) &_SeaBASS_Gibbs_cpp, 24},
+    {"_SeaBASS_SeaBASS_cpp", (DL_FUNC) &_SeaBASS_SeaBASS_cpp, 26},
+    {"_SeaBASS_rcpp_pgdraw", (DL_FUNC) &_SeaBASS_rcpp_pgdraw, 2},
     {"_SeaBASS_rcpparma_hello_world", (DL_FUNC) &_SeaBASS_rcpparma_hello_world, 0},
     {"_SeaBASS_rcpparma_outerproduct", (DL_FUNC) &_SeaBASS_rcpparma_outerproduct, 1},
     {"_SeaBASS_rcpparma_innerproduct", (DL_FUNC) &_SeaBASS_rcpparma_innerproduct, 1},

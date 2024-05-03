@@ -8,7 +8,7 @@ get_glm_coefs = function(data) {
   V=data$V
   nn=data$nn
   if(is.null(nn)) nn = rep(1, nrow(X))
-  
+  Alpha_glm = matrix(0, ncol(A), ncol(X) + 1)
   glm_coef = matrix(0, ncol(A), ncol(X) + 1)
   p_value = rep(0, ncol(X))
   b_ind = ncol(Alpha_glm)
@@ -29,7 +29,7 @@ get_glm_coefs = function(data) {
   beta_glm = glm_coef[, b_ind]
   alpha_glm = glm_coef[,-b_ind, drop=F]
   colnames(alpha_glm) = colnames(X)
-  q_value = p.adsust(p_value,"BH")
+  q_value = p.adjust(p_value,"BH")
   
   return(list(beta= beta_glm,
               alpha = t(alpha_glm),

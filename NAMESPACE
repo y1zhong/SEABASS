@@ -1,3 +1,4 @@
 useDynLib(SeaBASS, .registration=TRUE)
 importFrom(Rcpp, evalCpp)
 exportPattern("^[[:alpha:]]+")
+importFrom(dplyr, count)
